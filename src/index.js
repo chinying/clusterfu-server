@@ -2,7 +2,10 @@ const Hapi = require('@hapi/hapi')
 
 const server = new Hapi.Server({
   port: 7000,
-  host: 'localhost'
+  host: 'localhost',
+  routes: {
+    cors: true
+  }
 })
 
 server.route({
