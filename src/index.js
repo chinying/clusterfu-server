@@ -1,5 +1,6 @@
 const Hapi = require('@hapi/hapi')
 const endpoints = require('./endpoints')
+require('dotenv').config()
 
 const server = new Hapi.Server({
   port: 7000,
