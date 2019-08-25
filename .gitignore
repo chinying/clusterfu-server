@@ -87,4 +87,8 @@ typings/
 # DynamoDB Local files
 .dynamodb/
 
-build
+# custom
+# outdir of babel
+build 
+# csv file for postal
+src/data/
