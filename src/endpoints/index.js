@@ -1,8 +1,8 @@
-exports.plugin = {
+export const plugin = {
   name: 'routes',
-  register: (server, options) => {
+  register: async (server, options) => {
     server.register([
-      require('./upload')
+      await import('./upload')
     ])
   }
 }
