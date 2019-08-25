@@ -1,4 +1,5 @@
 const Hapi = require('@hapi/hapi')
+const endpoints = require('./endpoints')
 
 const server = new Hapi.Server({
   port: 7000,
@@ -22,7 +23,8 @@ exports.init = async () => {
 }
 
 const start = async () => {
-  await server.start();
+  await server.register(endpoints)
+  await server.start()
   console.log(`Server running at: ${server.info.uri}`)
   return server
 }
