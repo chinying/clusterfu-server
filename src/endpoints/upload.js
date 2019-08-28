@@ -27,20 +27,34 @@ export const plugin = {
       handler: async (request, h) => {
         if (!postalService.loaded) await postalService.init()
         const [head, ...tail] = request.payload.rows
-        let promisedCoords = tail.map(async row => {
-          const [originPostal, destinationPostal] = [row[1], row[2]].map(x => transformPostals(x))
-          return {origin: postalService.getXY(originPostal), destination: postalService.getXY(destinationPostal)}
-        })
-
-        let xy = await Promise.all(
-          promisedCoords.map(p => p.catch(() => null))
+        let promisedCoords = tail.reduce(
+          (acc, row) => {
+            if (row.length < 2) return acc // filters blank lines
+            const [originPostal, destinationPostal] = [row[1], row[2]].map(x => transformPostals(x))
+            acc[0].push(postalService.getXY(originPostal))
+            acc[1].push(postalService.getXY(destinationPostal))
+            return acc
+          },
+          [[], []]
         )
 
-        const entriesWithPostals = _.zip(xy, tail)
+        // can technically Promise.all([origins, destinations]) but I don't feel like figuring out the map / zip syntax
+        let origins = await Promise.all(
+          promisedCoords[0].map(p => p.catch(() => null))
+        )
+
+        let destinations = await Promise.all(
+          promisedCoords[1].map(p => p.catch(() => null))
+        )
+        const entriesWithPostals = _.zip(origins, destinations, tail)
           .map(r => {
             const row = _.flatten(r)
-            return [row[1], row[0].origin.x, row[0].origin.y, row[0].destination.x, row[0].destination.y, ...row.slice(2)]
+            if (!row || row.length < 4) return
+            let [origin, destination] = [row[0], row[1]]
+            if (!origin || !destination) return
+            return [row[2], origin.x, origin.y, destination.x, destination.y, ...row.slice(3)]
           })
+          .filter(x => x !== undefined)
 
         return h.response(entriesWithPostals)
       }
