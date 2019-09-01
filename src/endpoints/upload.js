@@ -2,6 +2,7 @@ const path = require('path')
 import { PostalDatabase } from '../services/postal'
 import * as _ from 'lodash'
 const AWS = require('aws-sdk')
+
 AWS.config.update({
   accessKeyId: process.env.ACCESSKEY,
   secretAccessKey: process.env.SECRETKEY,
@@ -24,6 +25,11 @@ export const plugin = {
     server.route({
       method: 'POST',
       path: '/upload',
+      config: {
+        payload: {
+          maxBytes: Number.MAX_SAFE_INTEGER
+        }
+      },
       handler: async (request, h) => {
         if (!postalService.loaded) await postalService.init()
         const [head, ...tail] = request.payload.rows
