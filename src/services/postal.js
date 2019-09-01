@@ -35,8 +35,8 @@ class PostalDatabase {
 
   /**
    * has to be async or cache will not return promise
-   * @param {Number} postal 
-   * @returns {Promise<x: string, y: string>}
+   * @param {Number} postal
+   * @returns {Promise<x: string, y: string> | undefined}
    */
   async getXY(postal) {
     try {
@@ -61,7 +61,7 @@ class PostalDatabase {
           let x = data['results'][0]['X']
           let y = data['results'][0]['Y']
           this.cache.set(postal, {x, y})
-  
+
           // TODO: batch write items (push to some array) to DB, maybe consider some form of queue
           let item = {
             'postal': {'N': postal},
@@ -70,16 +70,16 @@ class PostalDatabase {
             'y': {'N': y},
             'address': {'S': data['results'][0]['ADDRESS'] || ' '}
           }
-  
+
           this.newPostals.push(this.db.putItem({
             'Item': item,
             'TableName': process.env.POSTAL_TABLE_NAME
           }).promise())
-  
+
           return {x, y}
         }
       }
-      throw new Error(`unable to determine postal ${postal} from onemap`)
+      return undefined
     } catch (err) { throw err }
   }
 }
