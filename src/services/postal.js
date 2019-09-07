@@ -42,7 +42,12 @@ class PostalDatabase {
     try {
       if (this.blacklist.has(postal)) throw new Error('unable to determine postal')
       if (this.cache.has(postal)) return this.cache.get(postal)
-      if (this.fallbackOnOnemap) {
+      const dbResult = await this.queryDDB(postal)
+      if (dbResult.Count > 0) {
+        let retrievedItem = dbResult.Items[0]
+        this.cache.set(postal, {x: retrievedItem.x.N, y: retrievedItem.y.N})
+        return {x: retrievedItem.x.N, y: retrievedItem.y.N}
+      } else if (this.fallbackOnOnemap) {
         return this.queryOneMap(postal)
       }
       throw new Error('unable to determine postal')
@@ -50,6 +55,20 @@ class PostalDatabase {
       console.log(`cannot get postal ${postal}`)
       throw err
     }
+  }
+
+  queryDDB(postal) {
+    let params = {
+      ProjectionExpression: 'x, y',
+      TableName: process.env.DYNAMODB_TABLENAME,
+      ExpressionAttributeValues: {
+        ':v1': {
+          N: postal
+        }
+      },
+      KeyConditionExpression: 'postal = :v1'
+    }
+    return this.db.query(params).promise()
   }
 
   async queryOneMap(postal) {
