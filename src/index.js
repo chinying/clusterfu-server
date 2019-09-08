@@ -23,12 +23,25 @@ exports.init = async () => {
   return server
 }
 
-const start = async () => {
+const serverUp = async () => {
   await server.register(endpoints)
-  await server.start()
   console.log(`Server running at: ${server.info.uri}`)
   return server
 }
+
+async function start() {
+  try {
+    const server = await serverUp();
+    await server.start();
+  }
+  catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
+
+  console.log('Server running at:', server.info.uri);
+};
+
 
 process.on('unhandledRejection', (err) => {
   console.log(err)
