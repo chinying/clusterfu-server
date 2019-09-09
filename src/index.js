@@ -25,7 +25,7 @@ exports.init = async () => {
 
 const serverUp = async () => {
   await server.register(endpoints)
-  console.log(`Server running at: ${server.info.uri}`)
+  console.log('plugins registered')
   return server
 }
 
