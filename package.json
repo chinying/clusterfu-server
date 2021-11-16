@@ -15,7 +15,7 @@
   "dependencies": {
     "@hapi/boom": "^7.4.3",
     "@hapi/hapi": "^18.3.2",
-    "aws-sdk": "^2.517.0",
+    "aws-sdk": "^2.814.0",
     "axios": "^0.19.0",
     "csv-parser": "^2.3.0",
     "dotenv": "^8.1.0",
